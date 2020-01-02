@@ -2,11 +2,10 @@
   <div>
     <Upload
       :before-upload="handleUpload"
-      :on-progress="onProgress"
-      :on-error="onError"
-      :on-success="onSuccess"
       action="http://oss-beta.xchanger.cn/api/formData"
-    >123</Upload>
+    >
+      <Button type="primary">上传</Button>
+    </Upload>
   </div>
 </template>
 <script>
