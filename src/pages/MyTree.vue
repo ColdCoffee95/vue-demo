@@ -1,88 +1,100 @@
 <template>
   <div class="tree">
-    <MyTree 
-    :data="data" 
-    :load-data="loadData" 
-    :max-level="2" 
-    @append="appendThing"
-    @remove="removeThing"
-    >
-    </MyTree>
+    <OrganizationTree
+      :maxLevel="maxLevel"
+      :loadFetch="loadFetch"
+      :addRequest="addRequest"
+      :editRequest="editRequest"
+      :removeRequest="removeRequest"
+    ></OrganizationTree>
   </div>
 </template>
 
 <script>
-import MyTree from "../components/Tree";
+import OrganizationTree from "../components/OrganizationTree";
 export default {
   data() {
     return {
-      data: []
+      data: [],
+      maxLevel: 4
     };
   },
-  components: { MyTree },
-
-  created() {
-    this.fetchData();
-  },
-
+  components: { OrganizationTree },
   methods: {
-    fetchData() {
-      setTimeout(() => {
-        let backData = [{
-          id:1,
-          title:'一级1',
-          hasChildren:false
-        },{
-          id:2,
-          title:'一级2',
-          hasChildren:true
-        }];
-        backData.filter(b => b.hasChildren).forEach(b => {
-          b.loading = false;
-          b.selected = false;
-          b.children = [];
-        })
-        this.data = backData;
-      }, 1000);
-    },
-    loadData(item, callback) {
-      console.log('data',this.data)
-      setTimeout(() => {
-        const newData = item.nodeKey < 2?[
-          {
-            id: 1,
-            title: "一级1",
-            loading: false,
-            children: []
-          },
-          {
-            id: 2,
-            title: "一级2",
-            loading: false,
-            children: []
+    loadFetch(id) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          let backData;
+          if (!id) {
+            backData = [
+              {
+                id: 1,
+                title: "网易",
+                // hasChildren: true,
+                level: 1
+              }
+            ];
+            backData
+              .filter(b => b.hasChildren)
+              .forEach(b => {
+                b.loading = false;
+                b.selected = false;
+                b.children = [];
+              });
+          } else {
+            backData = [];
           }
-        ]:[{
-            id: 1,
-            title: "一级1",
-          },
-          {
-            id: 2,
-            title: "一级2",
-          }];
-        callback(newData)
-      }, 500);
-    },
-    appendThing(data){
-      console.log('appendThing')
-      const children = data.children || [];
-      children.push({
-        title: "appended node",
-        expand: true
+          resolve(backData);
+        }, 1000);
       });
-      this.$set(data, "children", children);
     },
-    removeThing(){
-      console.log('removeThing')
+    addRequest(data) {
+      console.log(data)
+      return new Promise((resolve) => {
+        // const {
+        //   form: { id, name },
+        //   level,
+        //   parentId
+        // } = data;
+        setTimeout(() => {
+          //下面写请求，请求完resolve
+
+          
+          resolve();
+        }, 500);
+      });
+    },
+    editRequest(data) {
+      console.log(data)
+      return new Promise((resolve) => {
+        // const {
+        //   form: { id, name },
+        //   level,
+        //   parentId
+        // } = data;
+        setTimeout(() => {
+          //下面写请求，请求完resolve
+
+
+          resolve();
+        }, 500);
+      });
+    },
+    removeRequest(data) {
+      console.log(data)
+      return new Promise((resolve) => {
+        // const {
+        //   form: { id, name },
+        //   level,
+        //   parentId
+        // } = data;
+        setTimeout(() => {
+          //下面写请求，请求完resolve
+
+
+          resolve();
+        }, 500);
+      });
     }
   }
 };
