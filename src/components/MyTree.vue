@@ -90,9 +90,9 @@ export default {
       return [
         h("TreeInput", {
           props: {
-            nameInput:data.title,
-            idInput:data.id,
-            type:'edit'
+            nameInput: data.title,
+            idInput: data.id,
+            type: "edit"
           },
           on: {
             onSubmit: form => {
@@ -169,7 +169,7 @@ export default {
     remove(data) {
       this.$emit("remove", data);
     },
-    edit(data){
+    edit(data) {
       this.$emit("edit", data);
     }
   }

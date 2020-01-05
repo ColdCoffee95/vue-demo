@@ -21,28 +21,28 @@ import MyTree from "./MyTree";
 export default {
   data() {
     return {
-      data: [],
+      data: []
     };
   },
 
   props: {
     loadFetch: {
       type: Function,
-      default: () => new Promise((resolve) => resolve([]))
+      default: () => new Promise(resolve => resolve([]))
     },
     addRequest: {
       type: Function,
-      default: () => new Promise((resolve) => resolve())
+      default: () => new Promise(resolve => resolve())
     },
     editRequest: {
       type: Function,
-      default: () => new Promise((resolve) => resolve())
+      default: () => new Promise(resolve => resolve())
     },
     removeRequest: {
       type: Function,
-      default: () => new Promise((resolve) => resolve())
+      default: () => new Promise(resolve => resolve())
     },
-    maxLevel:{
+    maxLevel: {
       type: Number,
       default: 3
     }
@@ -81,6 +81,7 @@ export default {
     //添加行点击确定后执行
     async onAddLine(data) {
       await this.addRequest(data);
+
       const {
         form: { id, name },
         level,
@@ -105,13 +106,7 @@ export default {
     //编辑行点击确定后执行
     async onEditLine(data) {
       await this.editRequest(data);
-      const findThing = this.iteratorFindParent(this.data, data.parentId, null);
-      const findData = findThing.children.find(c => c.id === data.id);
-      const findDataIndex = findThing.children.findIndex(c => c.id === data.id);
-      findData.title = data.form.name;
-      findData.editNode = false;
-      findThing.children.splice(findDataIndex, 1);
-      findThing.children.splice(findDataIndex, 0, findData);
+      this.editLineOperator(data, false, true);
     },
 
     //添加行点击取消后执行
@@ -122,10 +117,17 @@ export default {
 
     //编辑行点击取消后执行
     onCancelEditLine(data) {
+      this.editLineOperator(data, false, false);
+    },
+
+    //编辑节点处理器,data:点击编辑按钮的元素，editNode：传入true，则节点被修改为编辑状态，传入false，
+    //则节点被修改为节点状态，isEditSuccess：是否编辑成功，传入true，会改变元素的name
+    editLineOperator(data, editNode, isEditSuccess) {
       const findThing = this.iteratorFindParent(this.data, data.parentId, null);
       const findData = findThing.children.find(c => c.id === data.id);
       const findDataIndex = findThing.children.findIndex(c => c.id === data.id);
-      findData.editNode = false;
+      findData.editNode = editNode;
+      if (isEditSuccess) findData.title = data.form.name;
       findThing.children.splice(findDataIndex, 1);
       findThing.children.splice(findDataIndex, 0, findData);
     },
@@ -167,23 +169,26 @@ export default {
     },
     //点击删除按钮
     async removeThing(data) {
-      await this.removeRequest(data);
-      const findThing = this.iteratorFindParent(this.data, data.parentId, null);
-      const dataIndex = findThing.children.findIndex(c => c.id === data.id);
-      findThing.children.splice(dataIndex, 1);
+      this.$Modal.confirm({
+        title: "是否确定删除节点？",
+        onOk: async () => {
+          await this.removeRequest(data);
+          //判断上面的请求是否成功后再决定下面的代码是否应该进行
+          
+          const findThing = this.iteratorFindParent(
+            this.data,
+            data.parentId,
+            null
+          );
+          const dataIndex = findThing.children.findIndex(c => c.id === data.id);
+          findThing.children.splice(dataIndex, 1);
+        }
+      });
     },
     //点击编辑按钮
     onEdit(data) {
-      const findThing = this.iteratorFindParent(this.data, data.parentId, null);
-      const findData = findThing.children.find(c => c.id === data.id);
-      const findDataIndex = findThing.children.findIndex(c => c.id === data.id);
-      findData.editNode = true;
-      findThing.children.splice(findDataIndex, 1);
-      findThing.children.splice(findDataIndex, 0, findData);
+      this.editLineOperator(data, true, false);
     }
   }
 };
 </script>
-
-<style scoped>
-</style>
