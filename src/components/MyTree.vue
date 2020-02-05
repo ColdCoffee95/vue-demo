@@ -27,12 +27,12 @@ export default {
   },
   methods: {
     renderContent(h, { root, node, data }) {
-      if (data.newNode) {
-        return this.renderNewInput(h, { root, node, data });
-      }
-      if (data.editNode) {
-        return this.renderEditInput(h, { root, node, data });
-      }
+      // if (data.newNode) {
+      //   return this.renderNewInput(h, { root, node, data });
+      // }
+      // if (data.editNode) {
+      //   return this.renderEditInput(h, { root, node, data });
+      // }
       return h(
         "span",
         {
@@ -46,9 +46,11 @@ export default {
             h(
               "span",
               {
-                class: data.selected
-                  ? "ivu-tree-title ivu-tree-title-selected"
-                  : "ivu-tree-title",
+                style: {
+                  display: "inline-block",
+                  marginRight: "32px"
+                },
+                
                 on: {
                   click: () => {
                     this.onNodeClick(data);
@@ -63,8 +65,6 @@ export default {
             {
               style: {
                 display: "inline-block",
-                float: "right",
-                marginRight: "32px"
               }
             },
             this.renderButton(h, { root, node, data })
@@ -72,39 +72,39 @@ export default {
         ]
       );
     },
-    renderNewInput(h, { data }) {
-      return [
-        h("TreeInput", {
-          on: {
-            onSubmit: form => {
-              this.$emit("onAddLine", { form, ...data });
-            },
-            onCancel: () => {
-              this.$emit("cancelAddLine", data);
-            }
-          }
-        })
-      ];
-    },
-    renderEditInput(h, { data }) {
-      return [
-        h("TreeInput", {
-          props: {
-            nameInput: data.title,
-            idInput: data.id,
-            type: "edit"
-          },
-          on: {
-            onSubmit: form => {
-              this.$emit("onEditLine", { form, ...data });
-            },
-            onCancel: () => {
-              this.$emit("cancelEditLine", data);
-            }
-          }
-        })
-      ];
-    },
+    // renderNewInput(h, { data }) {
+    //   return [
+    //     h("TreeInput", {
+    //       on: {
+    //         onSubmit: form => {
+    //           this.$emit("onAddLine", { form, ...data });
+    //         },
+    //         onCancel: () => {
+    //           this.$emit("cancelAddLine", data);
+    //         }
+    //       }
+    //     })
+    //   ];
+    // },
+    // renderEditInput(h, { data }) {
+    //   return [
+    //     h("TreeInput", {
+    //       props: {
+    //         nameInput: data.title,
+    //         idInput: data.id,
+    //         type: "edit"
+    //       },
+    //       on: {
+    //         onSubmit: form => {
+    //           this.$emit("onEditLine", { form, ...data });
+    //         },
+    //         onCancel: () => {
+    //           this.$emit("cancelEditLine", data);
+    //         }
+    //       }
+    //     })
+    //   ];
+    // },
     renderButton(h, { data }) {
       const buttonList = [];
       if (!data.selected) {

@@ -7,21 +7,29 @@
       @append="appendThing"
       @remove="removeThing"
       @onNodeClick="onNodeClick"
-      @onAddLine="onAddLine"
-      @cancelAddLine="onCancelLine"
-      @onEditLine="onEditLine"
-      @cancelEditLine="onCancelEditLine"
       @edit="onEdit"
     ></MyTree>
+    <TreeInput 
+      :visible="visible"
+      @onSubmit="onModalSubmit"
+      @onCancel="onModalCancel"
+      :type="modalType"
+      :idInput="modalType === 'edit' ? operator.id:''"
+      :nameInput="modalType === 'edit' ? operator.title:''"
+    />
   </div>
 </template>
 
 <script>
 import MyTree from "./MyTree";
+import TreeInput from "./TreeInput";
 export default {
   data() {
     return {
-      data: []
+      data: [],
+      visible:false,
+      operator:null,//正在操作的节点
+      modalType:'add'
     };
   },
 
@@ -48,13 +56,39 @@ export default {
     }
   },
 
-  components: { MyTree },
+  components: { MyTree, TreeInput },
 
   async mounted() {
     this.data = await this.loadFetch();
   },
 
   methods: {
+    async onModalSubmit(data){
+      if(this.modalType === 'add'){
+        await this.addRequest(data);
+        const {level,id} = this.operator;
+        const newData = {
+          parentId:id,
+          id:data.id,
+          title: data.name,
+          hasChildren: false,
+          children: [],
+          expand: true,
+          level:level + 1
+        };
+        const children = this.operator.children || []
+        children.push(newData);
+        this.$set(this.operator, "children", children);
+      }else{
+        await this.editRequest(data);
+        const newData = {...this.operator,title:data.name};
+        this.editLineOperator(newData, false, true);
+      }
+      this.visible = false;
+    },
+    onModalCancel(){
+      this.visible = false;
+    },
     //根据元素的parentId递归查找其父元素
     iteratorFindParent(data, parentId, findThing) {
       for (let i = 0; i < data.length; i++) {
@@ -78,47 +112,6 @@ export default {
       }
       return findThing;
     },
-    //添加行点击确定后执行
-    async onAddLine(data) {
-      await this.addRequest(data);
-
-      const {
-        form: { id, name },
-        level,
-        parentId
-      } = data;
-      const newData = {
-        parentId,
-        id,
-        title: name,
-        hasChildren: false,
-        level
-      };
-      const findThing = this.iteratorFindParent(
-        this.data,
-        newData.parentId,
-        null
-      );
-      findThing.children.pop();
-      findThing.children.push(newData);
-    },
-
-    //编辑行点击确定后执行
-    async onEditLine(data) {
-      await this.editRequest(data);
-      this.editLineOperator(data, false, true);
-    },
-
-    //添加行点击取消后执行
-    onCancelLine(data) {
-      const findThing = this.iteratorFindParent(this.data, data.parentId, null);
-      findThing.children.pop();
-    },
-
-    //编辑行点击取消后执行
-    onCancelEditLine(data) {
-      this.editLineOperator(data, false, false);
-    },
 
     //编辑节点处理器,data:点击编辑按钮的元素，editNode：传入true，则节点被修改为编辑状态，传入false，
     //则节点被修改为节点状态，isEditSuccess：是否编辑成功，传入true，会改变元素的name
@@ -126,8 +119,7 @@ export default {
       const findThing = this.iteratorFindParent(this.data, data.parentId, null);
       const findData = findThing.children.find(c => c.id === data.id);
       const findDataIndex = findThing.children.findIndex(c => c.id === data.id);
-      findData.editNode = editNode;
-      if (isEditSuccess) findData.title = data.form.name;
+      if (isEditSuccess) findData.title = data.title;
       findThing.children.splice(findDataIndex, 1);
       findThing.children.splice(findDataIndex, 0, findData);
     },
@@ -139,7 +131,6 @@ export default {
 
     async onNodeClick(data) {
       //点击时，展开元素，选中元素
-      this.$set(data, "selected", true);
       this.$set(data, "expand", true);
       //点击时，如果haschildren为true，说明此节点有子节点，并且data.children为undefined也就是
       //!data.children为true或者data.children已经定义且为空数组时才去请求
@@ -152,20 +143,9 @@ export default {
     },
     //点击加号按钮
     appendThing(data) {
-      const children = data.children || [];
-      if (children.length > 0 && children[children.length - 1].newNode) {
-        //TODO,判断已经有节点正在增加，不能继续增加的提示
-        return;
-      }
-      children.push({
-        parentId: data.id,
-        newNode: true,
-        expand: true,
-        level: data.level + 1,
-        children: []
-      });
-      this.$set(data, "children", children);
-      this.$set(data, "expand", true);
+      this.visible = true;
+      this.modalType = 'add';
+      this.operator = data;
     },
     //点击删除按钮
     async removeThing(data) {
@@ -187,7 +167,9 @@ export default {
     },
     //点击编辑按钮
     onEdit(data) {
-      this.editLineOperator(data, true, false);
+      this.visible = true;
+      this.modalType = 'edit';
+      this.operator = data;
     }
   }
 };

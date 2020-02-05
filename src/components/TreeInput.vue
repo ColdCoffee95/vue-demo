@@ -1,9 +1,18 @@
 <template>
   <div class="tree-input">
-    <Input placeholder="请输入编码" class="small-input" v-model="idValue" v-if="type === 'add'" />
-    <Input placeholder="请输入名称" class="large-input" v-model="nameValue" />
-    <Button type="primary" @click="inputSubmit">确定</Button>
-    <Button @click="inputCancel">取消</Button>
+    <Modal
+      @on-ok="inputSubmit"
+      @on-cancel="inputCancel"
+      @on-visible-change="onVisibleChange"
+      :value="visible"
+      :width="300"
+      title="标题"
+    >
+      <div class="input-div">
+        <Input placeholder="请输入编码" class="small-input" v-model="idValue" v-if="type === 'add'" />
+        <Input placeholder="请输入名称" class="large-input" v-model="nameValue" />
+      </div>
+    </Modal>
   </div>
 </template>
 <script>
@@ -11,8 +20,16 @@ export default {
   data() {
     return {
       idValue: this.idInput,
-      nameValue: this.nameInput
+      nameValue: this.nameInput,
     };
+  },
+  watch:{
+    idInput:function(newVal){
+      this.idValue = newVal;
+    },
+    nameInput:function(newVal){
+      this.nameValue = newVal;
+    }
   },
   props: {
     idInput: {
@@ -23,7 +40,10 @@ export default {
     },
     type: {
       default: "add"
-    }
+    },
+    visible:{
+      default: false
+    },
   },
   methods: {
     inputSubmit() {
@@ -35,22 +55,28 @@ export default {
     },
     inputCancel() {
       this.$emit("onCancel", { type: this.type });
+    },
+    clearModal(){
+      this.idValue = ''
+      this.nameValue = ''
+    },
+    onVisibleChange(visible){
+      !visible && this.clearModal();
     }
   }
 };
 </script>
 <style lang="less">
-.tree-input {
-  width: 300px;
+.input-div{
+  width:300px;
   .small-input {
-    width: 140px;
+    width: 240px;
+    display: block;
   }
   .large-input {
     width: 240px;
-    margin-left: 10px;
-  }
-  button {
-    margin-left: 10px;
+    margin-top:20px;
+    display: block;
   }
 }
 </style>
