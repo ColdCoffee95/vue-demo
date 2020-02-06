@@ -11,6 +11,10 @@ const routers = new VueRouter({
         path:'/tree',
         name:'tree',
         component:() => import('../pages/MyTree')
+    },{
+        path:'/table',
+        name:'table',
+        component:() => import('../pages/MyTable')
     }]
 })
 export default routers;
